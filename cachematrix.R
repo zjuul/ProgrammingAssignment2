@@ -26,17 +26,19 @@ makeCacheMatrix <- function(original.matrix = matrix()) {
   # At first, we start out without nothing
   the.cache <<- NULL
   
-  # the get function returns the original matrix object, so the cacheSolve knows what to solve
+  # the get.original function returns the original matrix object, so the cacheSolve knows what to solve
   get.original <- function() original.matrix
 
-  # the inverse function overwrites the cache
+  # the overwrite.cache function overwrites the cache
   overwrite.cache <- function(solved.matrix) {
     the.cache <<- solved.matrix
   }
   
-  # return the solved matrix, which might be NULL if unsoved
+  # the get.cached.version function returns the currently cached version of the solution.
+  # this could be NULL if the matrix has never been solved
   get.cached.version <- function() the.cache
   
+  # you can call the functions in makeCacheMatrix by accessing the list elements 
   list(get.original    = get.original,
        overwrite.cache = overwrite.cache,
        get.from.cache  = get.cached.version)
@@ -56,16 +58,16 @@ cacheSolve <- function(cachematrix.object, ...) {
   the.cache <- cachematrix.object$get.from.cache()
   
   if(!is.null(the.cache)) {
-    # bingo, there is something in cache. Return it.
+    # bingo, there is something in cache. Return it blindly. Caller's risk. :)
     return(the.cache)
   }
   
-  # no cached version, so solve the original again
+  # no cached version, so get original matrix
   data <- cachematrix.object$get.original()
+  # and store the inverse in cache
   the.cache <- solve(data)
   
-  # overwrite the cache with the new
-  # -- this function wil
+  # overwrite the cache with the freshly solved matrix
   cachematrix.object$overwrite.cache(the.cache)
   
   # finally, return the freshly solved matrix, which is now in cache
