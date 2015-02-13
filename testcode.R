@@ -1,5 +1,6 @@
-
 # Test code
+
+source("cachematrix.R")
 
 # generate matrix, and the inverse of the matrix.
 size <- 1000 # size of the matrix edge, don't make this too big
