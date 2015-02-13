@@ -15,21 +15,31 @@
 # identical(mysolved, special.solved.1) & identical(mysolved, special.solved.2)
 # should return TRUE
 
-## makeCacheMatrix: This function creates a special "matrix" object that can cache its inverse.
 
-makeCacheMatrix <- function(x = matrix()) {
-  m <<- NULL
-  get <- function() x
-  set <- function(y) {
-    x <<- y
-    m <<- NULL
-  }
-  inverse <- function(solve.it) m <<- solve.it
-  get.inverse <- function() m
+## makeCacheMatrix: This function returns an list of functions that can
+## operate on a matrixcreates a special "matrix" object that can be used to look up a
+## cached version of the inverse (or create one)
+
+makeCacheMatrix <- function(original.matrix = matrix()) {
   
-  list(set = set, get = get,
-       inverse = inverse,
-       get.inverse = get.inverse)
+  # we create an object in ENV where we store the solved matrix
+  # At first, we start out without nothing
+  the.cache <<- NULL
+  
+  # the get function returns the original matrix object, so the cacheSolve knows what to solve
+  get.original <- function() original.matrix
+
+  # the inverse function overwrites the cache
+  overwrite.cache <- function(solved.matrix) {
+    the.cache <<- solved.matrix
+  }
+  
+  # return the solved matrix, which might be NULL if unsoved
+  get.cached.version <- function() the.cache
+  
+  list(get.original    = get.original,
+       overwrite.cache = overwrite.cache,
+       get.from.cache  = get.cached.version)
 }
 
 ## cacheSolve: This function computes the inverse of the special "matrix" returned by
@@ -37,17 +47,29 @@ makeCacheMatrix <- function(x = matrix()) {
 ## If the inverse has already been calculated (and the matrix has not changed), then
 ## cacheSolve should retrieve the inverse from the cache.
 
-cacheSolve <- function(x, ...) {
-   ## Return a matrix that is the inverse of 'x'
-  m <- x$get.inverse()
-  if(!is.null(m)) {
-    message("getting cached data")
-    return(m)
+cacheSolve <- function(cachematrix.object, ...) {
+   ## Return a matrix that is the inverse of the matrix that was passed to the makecachematrix
+   ## function.
+   ## input: a list, made by MakeCacheMatrix
+  
+  # check the cache
+  the.cache <- cachematrix.object$get.from.cache()
+  
+  if(!is.null(the.cache)) {
+    # bingo, there is something in cache. Return it.
+    return(the.cache)
   }
-  data <- x$get()
-  m <- solve(data)
-  x$inverse(m)
-  m
+  
+  # no cached version, so solve the original again
+  data <- cachematrix.object$get.original()
+  the.cache <- solve(data)
+  
+  # overwrite the cache with the new
+  # -- this function wil
+  cachematrix.object$overwrite.cache(the.cache)
+  
+  # finally, return the freshly solved matrix, which is now in cache
+  the.cache
 }
 
 
