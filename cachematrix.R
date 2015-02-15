@@ -5,7 +5,7 @@
 
 ## example test code:
 # 
-# size <- 5000 # size of the matrix edge
+# size <- 1000 # size of the matrix edge
 # mymatrix <- matrix(rnorm(size^2), nrow=size, ncol=size)
 #
 # special.matrix   <- makeCacheMatrix(mymatrix)
